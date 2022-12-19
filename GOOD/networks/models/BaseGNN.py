@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch_geometric.data.batch import Batch
 from torch import Tensor
 from GOOD.utils.config_reader import Union, CommonArgs, Munch
-from .Pooling import GlobalMeanPool, GlobalMaxPool, IdenticalPool
+from .Pooling import GlobalAddPool, GlobalMeanPool, GlobalMaxPool, IdenticalPool
 from torch.nn import Identity
 
 
@@ -134,5 +134,7 @@ class BasicEncoder(torch.nn.Module):
             self.readout = IdenticalPool()
         elif config.model.global_pool == 'mean':
             self.readout = GlobalMeanPool()
+        elif config.model.global_pool == 'sum':
+            self.readout = GlobalAddPool()
         else:
             self.readout = GlobalMaxPool()

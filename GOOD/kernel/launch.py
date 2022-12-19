@@ -51,7 +51,11 @@ def make_list_cmds(auto_args, conda_goodtg):
                     allowed = False
                     if auto_args.allow_algs:
                         for allowed_alg in auto_args.allow_algs:
-                            if allowed_alg in ood_config_path.name:
+                            print(auto_args.allow_algs)
+                            # exit()
+                            print(allowed_alg, ood_config_path.name)
+                            ood_config_alg = ood_config_path.name.split(".")[0]
+                            if allowed_alg == ood_config_alg:
                                 allowed = True
                     else:
                         allowed = True
@@ -73,6 +77,7 @@ def make_list_cmds(auto_args, conda_goodtg):
                         if 'extra_param' in sweep_config.keys():
                             sweep_config['extra_param'] = list(itertools.product(*sweep_config['extra_param']))
                         sweep_keys = list(sweep_config.keys())
+                        print(sweep_keys)
                         sweep_values = list(itertools.product(*sweep_config.values()))
                         sweep_args = []
                         for value_set in sweep_values:

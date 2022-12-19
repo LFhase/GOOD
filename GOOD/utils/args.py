@@ -74,7 +74,16 @@ class OODArgs(Tap):
     extra_param: List = None  #: OOD algorithms' extra hyperparameter(s).
 
     def process_args(self) -> None:
-        self.extra_param = [eval(param) for param in self.extra_param] if self.extra_param is not None else None
+        if self.extra_param is not None:
+            new_extra_param = []
+            for param in self.extra_param:
+                try:
+                    new_extra_param.append(eval(param))
+                except Exception as e:
+                    print(e)
+                    new_extra_param.append(param)
+            self.extra_param = new_extra_param
+        # self.extra_param = [eval(param) if type(param)!=str else param for param in self.extra_param] if self.extra_param is not None else None
 
 
 class AutoArgs(Tap):

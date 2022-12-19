@@ -42,21 +42,16 @@ def initialize_model_dataset(config: Union[CommonArgs, Munch]) -> Tuple[torch.nn
     # Load model
     print('#IN#Loading model...')
     model = load_model(config.model.model_name, config)
-
     return model, loader
-
-
-
 
 def main():
     args = args_parser()
     config = config_summoner(args)
-    load_logger(config)
-
+    logger,writer = load_logger(config)
     model, loader = initialize_model_dataset(config)
     ood_algorithm = load_ood_alg(config.ood.ood_alg, config)
 
-    pipeline = load_pipeline(config.pipeline, config.task, model, loader, ood_algorithm, config)
+    pipeline = load_pipeline(config.pipeline, config.task, model, loader, ood_algorithm, config,writer)
     pipeline.load_task()
 
     if config.task == 'train':

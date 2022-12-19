@@ -20,7 +20,8 @@ def load_pipeline(name: str,
                   model: torch.nn.Module,
                   loader: Union[DataLoader, Dict[str, DataLoader]],
                   ood_algorithm: BaseOODAlg,
-                  config: Union[CommonArgs, Munch]
+                  config: Union[CommonArgs, Munch],
+                  writer=None
                   ) -> Pipeline:
     r"""
     A pipeline loader.
@@ -34,7 +35,7 @@ def load_pipeline(name: str,
     """
     try:
         reset_random_seed(config)
-        pipeline = register.pipelines[name](task, model, loader, ood_algorithm, config)
+        pipeline = register.pipelines[name](task, model, loader, ood_algorithm, config, writer)
     except KeyError as e:
         print(f'#E#Pipeline {name} dose not exist.')
         raise e

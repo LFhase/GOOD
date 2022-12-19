@@ -70,14 +70,16 @@ class DIRGIN(GNNBasic):
 
         if self.training:
             # --- Conf repr ---
-            set_masks(conf_edge_weight, self)
-            conf_rep = self.get_graph_rep(
-                data=Data(x=conf_x, edge_index=conf_edge_index,
-                          edge_attr=conf_edge_attr, batch=conf_batch),
-                batch_size=batch_size
-            ).detach()
+            with torch.no_grad():
+                set_masks(conf_edge_weight, self)
+                conf_rep = self.get_graph_rep(
+                    data=Data(x=conf_x, edge_index=conf_edge_index,
+                            edge_attr=conf_edge_attr, batch=conf_batch),
+                    batch_size=batch_size
+                ).detach()
+                clear_masks(self)
             conf_out = self.get_conf_pred(conf_rep)
-            clear_masks(self)
+            
 
             # --- combine to causal phase (detach the conf phase) ---
             rep_out = []
@@ -139,8 +141,8 @@ class CausalAttNet(nn.Module):
     def __init__(self, causal_ratio, config, **kwargs):
         super(CausalAttNet, self).__init__()
         config_catt = copy.deepcopy(config)
-        config_catt.model.model_layer = 2
-        config_catt.model.dropout_rate = 0
+        # config_catt.model.model_layer = 2
+        # config_catt.model.dropout_rate = 0
         if kwargs.get('virtual_node'):
             self.gnn_node = vGINFeatExtractor(config_catt, without_readout=True, **kwargs)
         else:

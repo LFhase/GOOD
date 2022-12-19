@@ -3,6 +3,7 @@ import os
 import shlex
 import shutil
 from pathlib import Path
+from unittest import result
 
 import numpy as np
 from ruamel.yaml import YAML
@@ -15,7 +16,7 @@ from GOOD.utils.args import AutoArgs
 from GOOD.utils.args import args_parser
 from GOOD.utils.config_reader import load_config, args2config, merge_dicts
 from .basic_launcher import Launcher
-
+import sys
 
 @register.launcher_register
 class HarvestLauncher(Launcher):
@@ -23,6 +24,7 @@ class HarvestLauncher(Launcher):
         super(HarvestLauncher, self).__init__()
 
     def __call__(self, jobs_group, auto_args: AutoArgs):
+        # print(jobs_group)
         result_dict = self.harvest_all_fruits(jobs_group)
         best_fruits = self.picky_farmer(result_dict)
 
@@ -45,9 +47,10 @@ class HarvestLauncher(Launcher):
             # print(modified_config)
             final_top_config, _ = merge_dicts(top_config, modified_config)
             # print(final_top_config)
+            print(auto_args.final_root, final_path)
             yaml = YAML()
             yaml.indent(offset=2)
-            # yaml.dump(final_top_config, sys.stdout)
+            yaml.dump(final_top_config, sys.stdout)
             yaml.dump(final_top_config, final_path)
 
     def process_final_root(self, auto_args):
@@ -58,16 +61,18 @@ class HarvestLauncher(Launcher):
                 auto_args.final_root = Path(auto_args.final_root)
             else:
                 auto_args.final_root = Path(ROOT_DIR, 'configs', auto_args.final_root)
+
         if auto_args.final_root.exists():
-            ans = input(f'Overwrite {auto_args.final_root} by {auto_args.config_root}? [y/n]')
-            while ans != 'y' and ans != 'n':
-                ans = input(f'Invalid input: {ans}. Please answer y or n.')
-            if ans == 'y':
-                shutil.copytree(auto_args.config_root, auto_args.final_root)
-            elif ans == 'n':
-                pass
-            else:
-                raise ValueError(f'Unexpected value {ans}.')
+            pass
+            # ans = input(f'Overwrite {auto_args.final_root} by {auto_args.config_root}? [y/n]')
+            # while ans != 'y' and ans != 'n':
+            #     ans = input(f'Invalid input: {ans}. Please answer y or n.')
+            # if ans == 'y':
+            #     shutil.copytree(auto_args.config_root, auto_args.final_root)
+            # elif ans == 'n':
+            #     pass
+            # else:
+            #     raise ValueError(f'Unexpected value {ans}.')
         else:
             shutil.copytree(auto_args.config_root, auto_args.final_root)
 
@@ -76,7 +81,12 @@ class HarvestLauncher(Launcher):
         for ddsa_key in result_dict.keys():
             for key, value in result_dict[ddsa_key].items():
                 result_dict[ddsa_key][key] = np.stack([np.mean(value, axis=1), np.std(value, axis=1)], axis=1)
-            best_fruits[ddsa_key] = max(list(result_dict[ddsa_key].items()), key=lambda x: x[1][-1, 0])
+                print(f"{key:40s}:{result_dict[ddsa_key][key][-1][0]:.4f}+-{result_dict[ddsa_key][key][-1][1]:.4f}, {result_dict[ddsa_key][key][-2][0]:.4f}+-{result_dict[ddsa_key][key][-2][1]:.4f}")
+            if "zinc" in ddsa_key.lower():
+                best_fruits[ddsa_key] = min(list(result_dict[ddsa_key].items()), key=lambda x: x[1][-1, 0])
+            else:
+                best_fruits[ddsa_key] = max(list(result_dict[ddsa_key].items()), key=lambda x: x[1][-1, 0])
+
         print(best_fruits)
         return best_fruits
 
@@ -95,35 +105,45 @@ class HarvestLauncher(Launcher):
     def harvest_all_fruits(self, jobs_group):
         all_finished = True
         result_dict = dict()
+        unfinished_jobs = []
         for cmd_args in tqdm(jobs_group, desc='Harvesting ^_^'):
             args = args_parser(shlex.split(cmd_args)[1:])
             config = config_summoner(args)
             last_line = self.harvest(config.log_path)
-
+            print(config.log_path)
+            print(last_line)
             if not last_line.startswith('INFO: ChartInfo'):
                 print(cmd_args, 'Unfinished')
-                all_finished = False
-            result = last_line.split(' ')[2:]
-            key_args = shlex.split(cmd_args)[1:]
-            round_index = key_args.index('--exp_round')
-            key_args = key_args[:round_index] + key_args[round_index + 2:]
+                # all_finished = False
+                unfinished_jobs.append(cmd_args)
+            else:
+                result = last_line.split(' ')[2:]
+                key_args = shlex.split(cmd_args)[1:]
+                round_index = key_args.index('--exp_round')
+                key_args = key_args[:round_index] + key_args[round_index + 2:]
 
-            config_path_index = key_args.index('--config_path')
-            key_args.pop(config_path_index)  # Remove --config_path
-            config_path = Path(key_args.pop(config_path_index))  # Remove and save its value
-            config_path_parents = config_path.parents
-            dataset, domain, shift, algorithm = config_path_parents[2].stem, config_path_parents[1].stem, \
-                                                config_path_parents[0].stem, config_path.stem
-            ddsa_key = ' '.join([dataset, domain, shift, algorithm])
-            if ddsa_key not in result_dict.keys():
-                result_dict[ddsa_key] = dict()
+                config_path_index = key_args.index('--config_path')
+                key_args.pop(config_path_index)  # Remove --config_path
+                config_path = Path(key_args.pop(config_path_index))  # Remove and save its value
+                config_path_parents = config_path.parents
+                dataset, domain, shift, algorithm = config_path_parents[2].stem, config_path_parents[1].stem, \
+                                                    config_path_parents[0].stem, config_path.stem
+                ddsa_key = ' '.join([dataset, domain, shift, algorithm])
+                if ddsa_key not in result_dict.keys():
+                    result_dict[ddsa_key] = dict()
 
-            key_str = ' '.join(key_args)
-            if key_str not in result_dict[ddsa_key].keys():
-                result_dict[ddsa_key][key_str] = [[] for _ in range(5)]
-            result_dict[ddsa_key][key_str] = [r + [eval(result[i])] for i, r in
-                                              enumerate(result_dict[ddsa_key][key_str])]
+                key_str = ' '.join(key_args)
+                if key_str not in result_dict[ddsa_key].keys():
+                    result_dict[ddsa_key][key_str] = [[] for _ in range(5)]
+                
+                # print("===============")
+                # print(ddsa_key)
+                # print(key_str)
+                # print(result)
+                result_dict[ddsa_key][key_str] = [r + [eval(result[i])] for i, r in
+                                                enumerate(result_dict[ddsa_key][key_str])]
         if not all_finished:
             print('Please launch unfinished jobs using other launchers before harvesting.')
             exit(1)
+        print(f"{len(unfinished_jobs)} unfinished jobs: {unfinished_jobs}")
         return result_dict

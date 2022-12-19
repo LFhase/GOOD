@@ -184,13 +184,7 @@ def process_configs(config: Union[CommonArgs, Munch]):
     """
     # --- Dataset setting ---
     if config.dataset.dataset_root is None:
-        config.dataset.dataset_root = opj(STORAGE_DIR, 'datasets')
-
-    # --- tensorboard directory setting ---
-    config.tensorboard_logdir = opj(STORAGE_DIR, 'tensorboard', f'{config.dataset.dataset_name}')
-    if config.dataset.shift_type:
-        config.tensorboard_logdir = opj(config.tensorboard_logdir, config.dataset.shift_type, config.ood.ood_alg,
-                                        str(config.ood.ood_param))
+        config.dataset.dataset_root = opj(STORAGE_DIR, '../datasets')
 
     # --- Round setting ---
     if config.exp_round:
@@ -217,6 +211,14 @@ def process_configs(config: Union[CommonArgs, Munch]):
     if config.save_tag:
         log_dirs = opj(log_dirs, config.save_tag)
     config.log_path = opj(log_dirs, config.log_file + '.log')
+
+    # --- tensorboard directory setting ---
+    config.tensorboard_logdir = opj(STORAGE_DIR,'tb_logs',dataset_dirname,model_dirname, train_dirname, ood_dirname)
+    # config.tensorboard_logdir = opj(STORAGE_DIR, 'tensorboard', f'{config.dataset.dataset_name}')
+    # if config.dataset.shift_type:
+    #     config.tensorboard_logdir = opj(config.tensorboard_logdir, config.dataset.domain,config.dataset.shift_type, config.ood.ood_alg,
+    #                                     str(config.ood.ood_param))
+    #     config.log_file = model_dirname+ood_dirname+train_dirname
 
     # --- Checkpoint setting ---
     if config.ckpt_root is None:

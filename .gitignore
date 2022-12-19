@@ -12,3 +12,13 @@ docs/build
 /GOOD/kernel/auto_curve.py
 /GOOD/kernel/auto_curve_chart.py
 /configs/auto_config_finetune/
+*.pyc
+graph_ood.egg-info/*
+*.log
+configs/final_configs/*
+configs/sweep_configs/*
+jizhi/*
+GOOD.egg-info/*
+tasks/*
+GOOD/definitions.py
+GOOD/networks/models/*GCN*.py

@@ -15,9 +15,11 @@ from torch_geometric.data import Batch
 from tqdm import tqdm
 
 from GOOD.ood_algorithms.algorithms.BaseOOD import BaseOODAlg
+from GOOD.utils import metric
 from GOOD.utils.args import CommonArgs
 from GOOD.utils.evaluation import eval_data_preprocess, eval_score
 from GOOD.utils.logger import pbar_setting
+from GOOD.utils.logger import print_env
 from GOOD.utils.register import register
 from GOOD.utils.train import nan2zero_get_mask
 
@@ -38,13 +40,15 @@ class Pipeline:
 
     def __init__(self, task: str, model: torch.nn.Module, loader: Union[DataLoader, Dict[str, DataLoader]],
                  ood_algorithm: BaseOODAlg,
-                 config: Union[CommonArgs, Munch]):
+                 config: Union[CommonArgs, Munch],
+                 writer=None):
         super(Pipeline, self).__init__()
         self.task: str = task
         self.model: torch.nn.Module = model
         self.loader: Union[DataLoader, Dict[str, DataLoader]] = loader
         self.ood_algorithm: BaseOODAlg = ood_algorithm
         self.config: Union[CommonArgs, Munch] = config
+        self.writer = writer
 
     def train_batch(self, data: Batch, pbar) -> dict:
         r"""
@@ -81,6 +85,9 @@ class Pipeline:
         r"""
         Training pipeline. (Project use only)
         """
+        print_env()
+        print(f'#IN#{self.model}')
+        
         # config model
         print('#D#Config model')
         self.config_model('train')
@@ -150,6 +157,19 @@ class Pipeline:
             val_stat = self.evaluate('val')
             test_stat = self.evaluate('test')
 
+            # tensorboard logging
+            if self.writer is not None:
+                metric_dict = {"train_stat/score":epoch_train_stat['score'],"train_stat/loss":epoch_train_stat['loss'].item(),
+                                "id_val_stat/score":id_val_stat['score'],"id_val_stat/loss":id_val_stat['loss'].item(),
+                                "id_test_stat/score":id_test_stat['score'],"id_test_stat/loss":id_test_stat['loss'].item(),
+                                "val_stat/score":val_stat['score'],"val_stat/loss":val_stat['loss'].item(),
+                                "test_stat/score":test_stat['score'],"test_stat/loss":test_stat['loss'].item(),
+                                }
+                for k,v in metric_dict.items():
+                    self.writer.add_scalar(k,v,epoch)
+                if self.config.ood.ood_alg not in ['ERM', 'GroupDRO', 'Mixup']:
+                    self.writer.add_scalar("train_stat/ood_loss",spec_loss,epoch)
+                print(metric_dict)
             # checkpoints save
             self.save_epoch(epoch, epoch_train_stat, id_val_stat, id_test_stat, val_stat, test_stat, self.config)
 

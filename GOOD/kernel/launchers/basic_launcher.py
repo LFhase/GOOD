@@ -23,9 +23,10 @@ class Launcher:
                 print(cmd_args, '\033[1;33m[READY]\033[0m')
                 ready_jobs_group.append(cmd_args)
 
-        ans = input(f'Launch unfinished {len(ready_jobs_group)} jobs or all {len(jobs_group)} jobs? [u/a]')
-        while ans != 'u' and ans != 'a':
-            ans = input(f'Invalid input: {ans}. Please answer u or a.')
+        # ans = input(f'Launch unfinished {len(ready_jobs_group)} jobs or all {len(jobs_group)} jobs? [u/a]')
+        ans = 'u'
+        # while ans != 'u' and ans != 'a':
+        #     ans = input(f'Invalid input: {ans}. Please answer u or a.')
         if ans == 'u':
             jobs_group = ready_jobs_group
         elif ans == 'a':
@@ -33,9 +34,10 @@ class Launcher:
         else:
             raise ValueError(f'Unexpected value {ans}.')
 
-        ans = input(f'Sure to launch {len(jobs_group)} jobs? [y/n]')
-        while ans != 'y' and ans != 'n':
-            ans = input(f'Invalid input: {ans}. Please answer y or n.')
+        # ans = input(f'Sure to launch {len(jobs_group)} jobs? [y/n]')
+        ans = 'y'
+        # while ans != 'y' and ans != 'n':
+        #     ans = input(f'Invalid input: {ans}. Please answer y or n.')
         if ans == 'y':
             return jobs_group
         elif ans == 'n':

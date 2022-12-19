@@ -57,9 +57,9 @@ class GCNFeatExtractor(GNNBasic):
         Args:
             config (Union[CommonArgs, Munch]): munchified dictionary of args (:obj:`config.model.dim_hidden`, :obj:`config.model.model_layer`, :obj:`config.dataset.dim_node`)
     """
-    def __init__(self, config: Union[CommonArgs, Munch]):
+    def __init__(self, config: Union[CommonArgs, Munch], **kwargs):
         super(GCNFeatExtractor, self).__init__(config)
-        self.encoder = GCNEncoder(config)
+        self.encoder = GCNEncoder(config, **kwargs)
         self.edge_feat = False
 
     def forward(self, *args, **kwargs):
@@ -115,11 +115,15 @@ class GCNEncoder(BasicEncoder):
         config (Union[CommonArgs, Munch]): munchified dictionary of args (:obj:`config.model.dim_hidden`, :obj:`config.model.model_layer`, :obj:`config.dataset.dim_node`)
     """
 
-    def __init__(self, config: Union[CommonArgs, Munch]):
+    def __init__(self, config: Union[CommonArgs, Munch], **kwargs):
+        # config.model.dim_hidden *= 2
         super(GCNEncoder, self).__init__(config)
         num_layer = config.model.model_layer
-
-        self.conv1 = GCNConv(config.dataset.dim_node, config.model.dim_hidden)
+        self.without_readout = kwargs.get('without_readout')
+        if kwargs.get('without_embed'):
+            self.conv1 = GCNConv(config.model.dim_hidden, config.model.dim_hidden)
+        else:
+            self.conv1 = GCNConv(config.dataset.dim_node, config.model.dim_hidden)
         self.convs = nn.ModuleList(
             [
                 GCNConv(config.model.dim_hidden, config.model.dim_hidden)
@@ -127,7 +131,7 @@ class GCNEncoder(BasicEncoder):
             ]
         )
 
-    def forward(self, x, edge_index, edge_weight, batch):
+    def forward(self, x, edge_index, batch, batch_size,**kwargs):
         r"""
         The GCN encoder.
 
@@ -140,15 +144,16 @@ class GCNEncoder(BasicEncoder):
         Returns (Tensor):
             node feature representations
         """
-        post_conv = self.dropout1(self.relu1(self.batch_norm1(self.conv1(x, edge_index, edge_weight))))
+        post_conv = self.dropout1(self.relu1(self.batch_norm1(self.conv1(x, edge_index))))
         for i, (conv, batch_norm, relu, dropout) in enumerate(
                 zip(self.convs, self.batch_norms, self.relus, self.dropouts)):
-            post_conv = batch_norm(conv(post_conv, edge_index, edge_weight))
+            post_conv = batch_norm(conv(post_conv, edge_index))
             if i < len(self.convs) - 1:
                 post_conv = relu(post_conv)
             post_conv = dropout(post_conv)
-
-        out_readout = self.readout(post_conv, batch)
+        if self.without_readout or kwargs.get('without_readout'):
+            return post_conv
+        out_readout = self.readout(post_conv, batch, batch_size)
         return out_readout
 
 

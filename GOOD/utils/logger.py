@@ -2,7 +2,6 @@ r"""A logger related utils file: tqdm style, logger loader.
 """
 import os
 from datetime import datetime
-
 from cilog import create_logger
 from torch.utils.tensorboard import SummaryWriter
 
@@ -39,3 +38,20 @@ def load_logger(config: Union[CommonArgs, Munch], sub_print=True):
     writer = SummaryWriter(
         log_dir=os.path.join(config.tensorboard_logdir, f'{config.log_file}_{current_time}'))
     return logger, writer
+
+
+
+def print_env():
+    import sys
+    import numpy as np
+    import torch
+    print("#IN#Environment:")
+    if torch.cuda.device_count()>0:
+        print("#IN#GPU: {}".format(torch.cuda.get_device_name(torch.cuda.current_device())))
+    else:
+        print("#IN#GPU: CPU : (")
+    print("#IN#Python: {}".format(sys.version.split(" ")[0]))
+    print("#IN#PyTorch: {}".format(torch.__version__))
+    print("#IN#CUDA: {}".format(torch.version.cuda))
+    print("#IN#CUDNN: {}".format(torch.backends.cudnn.version()))
+    print("#IN#NumPy: {}".format(np.__version__))
