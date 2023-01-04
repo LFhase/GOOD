@@ -119,7 +119,11 @@ class GOODArxiv(InMemoryDataset):
         self.download()
 
     def download(self):
-        path = gdown.download(self.url, output=osp.join(self.raw_dir, self.name + '.zip'), fuzzy=True)
+        try:
+            path = gdown.download(self.url, output=osp.join(self.raw_dir, self.name + '.zip'), fuzzy=True)
+        except Exception as e:
+            print(e)
+        path = osp.join(self.raw_dir, self.name + '.zip')
         extract_zip(path, self.raw_dir)
         os.unlink(path)
 

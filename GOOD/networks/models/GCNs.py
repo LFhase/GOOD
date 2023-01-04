@@ -131,7 +131,7 @@ class GCNEncoder(BasicEncoder):
             ]
         )
 
-    def forward(self, x, edge_index, batch, batch_size,**kwargs):
+    def forward(self, x, edge_index, edge_weight, batch,**kwargs):
         r"""
         The GCN encoder.
 
@@ -147,13 +147,13 @@ class GCNEncoder(BasicEncoder):
         post_conv = self.dropout1(self.relu1(self.batch_norm1(self.conv1(x, edge_index))))
         for i, (conv, batch_norm, relu, dropout) in enumerate(
                 zip(self.convs, self.batch_norms, self.relus, self.dropouts)):
-            post_conv = batch_norm(conv(post_conv, edge_index))
+            post_conv = batch_norm(conv(post_conv, edge_index,edge_weight))
             if i < len(self.convs) - 1:
                 post_conv = relu(post_conv)
             post_conv = dropout(post_conv)
         if self.without_readout or kwargs.get('without_readout'):
             return post_conv
-        out_readout = self.readout(post_conv, batch, batch_size)
+        out_readout = self.readout(post_conv, batch)
         return out_readout
 
 
