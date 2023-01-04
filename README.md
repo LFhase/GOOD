@@ -6,6 +6,7 @@ This repo contains the [CIGA](https://github.com/LFhase/CIGA) implementation und
 The hyper-parameter configurations are given in yaml files under the following folders:
 - CIGAv1: `configs/final_configs/{dataset}/CIGA.yaml`
 - CIGAv2: `configs/GOOD_configs/{dataset}/CIGA.yaml`
+- 
 The sweeping is performed under the recommended protocol of the benchmark.
 Specifically, the final hyperparameters are selected according to the OOD validation performance under three random seeds in `1 5 10`.
 
