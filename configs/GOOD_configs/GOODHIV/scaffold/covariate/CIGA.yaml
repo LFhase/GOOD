@@ -1,15 +1,18 @@
 includes:
   - base.yaml
 model:
-  model_name: CIGAvGIN
+  model_name: CIGAGIN
+  dropout_rate: 0.5
 ood:
   ood_alg: CIGA
-  ood_param: 0.8     # causal ratio
+  ood_param: 0.8
   extra_param:
-    - 1     # additional loss control
+    - 4
+    - 1
 train:
+  train_bs: 128
+  val_bs: 128
+  test_bs: 128
   max_epoch: 200
-  train_bs: 32
-  lr: 1e-3
-
-
+  lr: 0.001
+log_file: default

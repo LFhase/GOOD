@@ -4,5 +4,6 @@ model:
   model_layer: 3
   global_pool: mean
 train:
+  train_bs: 128
   num_steps: 10
   mile_stones: [150]
