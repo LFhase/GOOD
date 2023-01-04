@@ -29,9 +29,6 @@ Now the benchmarking results of CIGA covers **both** `covariate` and `concept` s
 - GOODPCBA
   - [ ] scaffold
   - [ ] size
-- GOODPCBA
-  - [ ] scaffold
-  - [ ] size
 
 We will continue update the results for the left datasets and `node classification` datasets.
 
