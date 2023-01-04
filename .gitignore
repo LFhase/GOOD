@@ -15,7 +15,6 @@ docs/build
 *.pyc
 graph_ood.egg-info/*
 *.log
-configs/final_configs/*
 configs/sweep_configs/*
 jizhi/*
 GOOD.egg-info/*
