@@ -158,7 +158,7 @@ class CIGAvGIN(CIGAGIN):
         super(CIGAvGIN, self).__init__(config)
         self.att_net = GAEAttNet(config.ood.ood_param, config, virtual_node=True)
         config_fe = copy.deepcopy(config)
-        # config_fe.model.model_layer = config.model.model_layer - 2
+        config_fe.model.model_layer = config.model.model_layer - 2
         self.feat_encoder = vGINFeatExtractor(config_fe, without_embed=self.contrast_rep!="raw")
     
 @register.model_register
@@ -168,7 +168,7 @@ class CIGAvGINNB(CIGAGIN):
         super(CIGAvGINNB, self).__init__(config)
         self.att_net = GAEAttNet(config.ood.ood_param, config, virtual_node=True, no_bn=True)
         config_fe = copy.deepcopy(config)
-        # config_fe.model.model_layer = config.model.model_layer - 2
+        config_fe.model.model_layer = config.model.model_layer - 2
         self.feat_encoder = vGINFeatExtractor(config_fe, without_embed=self.contrast_rep!="raw")
 
 
@@ -182,8 +182,10 @@ class GAEAttNet(nn.Module):
         if type(config.ood.extra_param[-1]) == str:
             self.contrast_rep = config.ood.extra_param[-1]
         # if self.contrast_rep == "feat":
-        #     config_catt.model.model_layer = 2
-        #     config_catt.model.dropout_rate = 0
+            # config_catt.model.model_layer = 2
+            # config_catt.model.dropout_rate = 0
+        # virtual node + small batch size can cause cuda mem access error
+        # though it runs well on CPU
         if kwargs.get('virtual_node'):
             self.gnn_node = vGINFeatExtractor(config_catt, without_readout=True, **kwargs)
         else:

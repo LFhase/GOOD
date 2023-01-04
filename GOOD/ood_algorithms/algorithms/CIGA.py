@@ -148,7 +148,7 @@ class CIGA(BaseOODAlg):
             cls_loss = (causal_loss * mask).sum() / mask.sum()
             # contrast_loss = get_contrast_loss(self.rep_out[mask,:],targets[mask].view(-1),sampling="env",env_idx=self.env_id)
             contrast_loss = get_contrast_loss(self.rep_out[mask,:],targets[mask].view(-1))
-            if False and len(config.ood.extra_param)>1:
+            if len(config.ood.extra_param)>1:
                 # hinge loss
                 spu_loss_weight = torch.zeros(spu_loss.size()).to(raw_pred.device)
                 spu_loss_weight[spu_loss > causal_loss] = 1.0
