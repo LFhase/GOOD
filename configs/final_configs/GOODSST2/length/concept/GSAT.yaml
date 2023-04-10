@@ -4,16 +4,6 @@ model:
   model_name: GSATvGIN
 ood:
   ood_alg: GSAT
-<<<<<<< HEAD
-  ood_param: 1.0    # info loss coefficient
-  extra_param:
-    - true    # learn_edge_att
-    - 20      # decay_interval
-    - 0.5     # final_r
-train:
-  max_epoch: 200
-  lr: 1e-3
-=======
   ood_param: 1.0
   extra_param:
     - true
@@ -25,4 +15,3 @@ train:
   weight_decay: 0.0
 log_file: lb_sweeping
 num_workers: 0
->>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c

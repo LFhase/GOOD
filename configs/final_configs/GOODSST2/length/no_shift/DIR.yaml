@@ -4,13 +4,9 @@ model:
   model_name: DIRvGIN
 ood:
   ood_alg: DIR
-  ood_param: 0.8    # causal ratio
+  ood_param: 0.8 # causal ratio
   extra_param:
     - 10 #1e-4
 train:
-<<<<<<< HEAD
-  max_epoch: 100
-=======
   max_epoch: 200
->>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
   lr: 1e-3
