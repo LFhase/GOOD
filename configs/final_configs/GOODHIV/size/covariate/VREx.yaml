@@ -4,9 +4,19 @@ model:
   model_name: vGIN
 ood:
   ood_alg: VREx
+<<<<<<< HEAD
   ood_param: 10.
 train:
   max_epoch: 200
   lr: 1e-3
 
 
+=======
+  ood_param: 1.0
+train:
+  max_epoch: 200
+  lr: 0.001
+  weight_decay: 0.0
+log_file: lb_sweeping
+num_workers: 0
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c

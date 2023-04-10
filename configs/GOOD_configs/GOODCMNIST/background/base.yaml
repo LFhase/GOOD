@@ -2,7 +2,11 @@ includes:
   - ../base.yaml
 dataset:
   dataset_name: GOODCMNIST
+<<<<<<< HEAD
   domain: color
+=======
+  domain: background
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 train:
   max_epoch: 500
   train_bs: 128

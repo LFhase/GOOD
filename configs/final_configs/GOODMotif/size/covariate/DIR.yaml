@@ -4,6 +4,7 @@ model:
   model_name: DIRGIN
 ood:
   ood_alg: DIR
+<<<<<<< HEAD
   ood_param: 0.25    # causal ratio
   extra_param:
     - 1e-2     # additional loss control
@@ -13,3 +14,16 @@ train:
   mile_stones: [150]
 
 
+=======
+  ood_param: 0.8
+  extra_param:
+    - 0.01
+train:
+  max_epoch: 200
+  lr: 0.001
+  mile_stones:
+    - 150
+  weight_decay: 0.0
+log_file: lb_sweeping
+num_workers: 0
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c

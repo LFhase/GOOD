@@ -8,13 +8,14 @@ ckpt_dir: null
 save_tag: null
 pytest: False
 pipeline: Pipeline
+num_workers: 1
 train:
   weight_decay: 0.
   save_gap: 10
   tr_ctn: False
   ctn_epoch: 0
   epoch: 0
-  alpha: 0.2  # parameter for DANN
+  alpha: 0.2 # parameter for DANN
   stage_stones: []
 model:
   dim_hidden: 300

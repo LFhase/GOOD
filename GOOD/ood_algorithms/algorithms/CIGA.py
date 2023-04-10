@@ -1,6 +1,11 @@
 """
 Implementation of the CIGA algorithm from `"Learning Causally Invariant Representations for Out-of-Distribution Generalization on Graphs"
 <https://arxiv.org/abs/2202.05441>`_ paper
+<<<<<<< HEAD
+=======
+
+Copied from "https://github.com/LFhase/GOOD".
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 """
 from re import M
 import torch
@@ -10,7 +15,11 @@ from torch_geometric.data import Batch
 from GOOD import register
 from GOOD.utils.config_reader import Union, CommonArgs, Munch
 from .BaseOOD import BaseOODAlg
+<<<<<<< HEAD
 from typing import Tuple
+=======
+
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 
 @register.ood_alg_register
 class CIGA(BaseOODAlg):
@@ -26,6 +35,7 @@ class CIGA(BaseOODAlg):
         self.rep_out = None
         self.causal_out = None
         self.spu_out = None
+<<<<<<< HEAD
         self.env_id = None
         self.step = 0
         self.ratio = config.ood.ood_param
@@ -75,6 +85,9 @@ class CIGA(BaseOODAlg):
             self.env_id = data.env_id
         return data, targets, mask, node_norm
     
+=======
+        self.step=0
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 
     def output_postprocess(self, model_output: Tensor, **kwargs) -> Tensor:
         r"""
@@ -88,7 +101,11 @@ class CIGA(BaseOODAlg):
 
         """
         if isinstance(model_output, tuple):
+<<<<<<< HEAD
             self.rep_out, self.causal_out, self.spu_out, self.edge_att = model_output
+=======
+            self.rep_out, self.causal_out, self.spu_out = model_output
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         else:
             self.causal_out = model_output
             self.rep_out, self.spu_out = None, None
@@ -116,6 +133,7 @@ class CIGA(BaseOODAlg):
             loss based on IRM algorithm
 
         """
+<<<<<<< HEAD
         # for i in range(config.dataset.num_envs):
         #     env_idx = data.env_id == i
         self.step += 1
@@ -148,6 +166,19 @@ class CIGA(BaseOODAlg):
             cls_loss = (causal_loss * mask).sum() / mask.sum()
             # contrast_loss = get_contrast_loss(self.rep_out[mask,:],targets[mask].view(-1),sampling="env",env_idx=self.env_id)
             contrast_loss = get_contrast_loss(self.rep_out[mask,:],targets[mask].view(-1))
+=======
+        self.step += 1
+        if self.rep_out is not None:
+            # print(mask.sum(),self.rep_out.size(),targets.size(),mask.size())
+            # print(self.rep_out[mask.view(-1),:].size(),targets[mask].size())
+            causal_loss = config.metric.loss_func(raw_pred, targets, reduction='none') 
+            spu_loss = config.metric.loss_func(self.spu_out, targets, reduction='none')
+            # print(causal_loss.sum(),spu_loss.sum())
+            assert self.rep_out.size(0)==targets[mask].size(0), print(mask.sum(),self.rep_out.size(),targets.size(),mask.size())
+                # exit()
+            cls_loss = (causal_loss * mask).sum() / mask.sum()
+            contrast_loss = get_contrast_loss(self.rep_out[mask.view(-1),:],targets[mask.view(-1)].view(-1))
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
             if len(config.ood.extra_param)>1:
                 # hinge loss
                 spu_loss_weight = torch.zeros(spu_loss.size()).to(raw_pred.device)
@@ -158,10 +189,17 @@ class CIGA(BaseOODAlg):
             else:
                 hinge_loss = 0
             # print(cls_loss, contrast_loss)
+<<<<<<< HEAD
             if self.step <= self.anneal_step:
                 loss = cls_loss+info_loss
             else:
                 loss = cls_loss+info_loss + config.ood.extra_param[0] * contrast_loss + \
+=======
+            if self.step <= -1:
+                loss = cls_loss
+            else:
+                loss = cls_loss + config.ood.extra_param[0] * contrast_loss + \
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
                             (config.ood.extra_param[1] if len(config.ood.extra_param)>1 else 0) * hinge_loss
             self.mean_loss = cls_loss
             self.spec_loss = contrast_loss + hinge_loss
@@ -176,11 +214,15 @@ class CIGA(BaseOODAlg):
     def loss_postprocess(self, loss: Tensor, data: Batch, mask: Tensor, config: Union[CommonArgs, Munch],
                          **kwargs) -> Tensor:
         return loss
+<<<<<<< HEAD
     def get_r(self, decay_interval, decay_r, current_epoch, init_r=0.9, final_r=0.5):
         r = init_r - current_epoch // decay_interval * decay_r
         if r < final_r:
             r = final_r
         return r
+=======
+
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 
 
 
@@ -208,12 +250,19 @@ def get_irm_loss(causal_pred, labels, batch_env_idx, criterion=F.cross_entropy):
     return irm_loss
 
 
+<<<<<<< HEAD
 def get_contrast_loss(causal_rep, labels, norm=F.normalize, contrast_t=1.0, sampling="mul",env_idx=None):
     if norm != None:
         causal_rep = norm(causal_rep)
     # TODO: float labels & multi-labels
 
     if sampling.lower() in ['mul']:
+=======
+def get_contrast_loss(causal_rep, labels, norm=F.normalize, contrast_t=1.0, sampling='mul'):
+    if norm != None:
+        causal_rep = norm(causal_rep)
+    if sampling.lower() in ['mul', 'var']:
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         # imitate https://github.com/HobbitLong/SupContrast/blob/master/losses.py#L11
         device = causal_rep.device
         mask = torch.eq(labels.unsqueeze(1), labels.unsqueeze(1).T).float().to(device)
@@ -223,19 +272,39 @@ def get_contrast_loss(causal_rep, labels, norm=F.normalize, contrast_t=1.0, samp
         logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
         logits = anchor_dot_contrast - logits_max.detach()
         # tile mask: no need
+<<<<<<< HEAD
         batch_size = labels.size(0)
         anchor_count = 1
         # mask-out self-contrast cases
         logits_mask = torch.scatter(torch.ones_like(mask), 1,
                                     torch.arange(batch_size * anchor_count).view(-1, 1).to(device), 0)
+=======
+        # mask = mask.repeat(anchor_count, contrast_count)
+        batch_size = labels.size(0)
+        anchor_count = 1
+        # mask-out self-contrast cases
+        # print(torch.ones_like(mask).size())
+        # print(torch.arange(batch_size * anchor_count).view(-1, 1).to(device).size())
+        logits_mask = torch.scatter(torch.ones_like(mask), 1,
+                                    torch.arange(batch_size * anchor_count).view(-1, 1).to(device), 0)
+        # print(graph.y)
+        # print(causal_rep)
+        # print(logits_mask)
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         mask = mask * logits_mask
         # compute log_prob
         exp_logits = torch.exp(logits) * logits_mask
         log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
+<<<<<<< HEAD
+=======
+        # print(log_prob)
+        # print(mask.sum(1))
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         # compute mean of log-likelihood over positive
         is_valid = mask.sum(1) != 0
         mean_log_prob_pos = (mask * log_prob).sum(1)[is_valid] / mask.sum(1)[is_valid]
         # some classes may not be sampled by more than 2
+<<<<<<< HEAD
         # loss
         contrast_loss = -mean_log_prob_pos.mean()
     elif sampling.lower() == 'env':
@@ -274,4 +343,28 @@ def get_contrast_loss(causal_rep, labels, norm=F.normalize, contrast_t=1.0, samp
         # some classes may not be sampled by more than 2
         # loss
         contrast_loss = -mean_log_prob_pos.mean()
+=======
+        # mean_log_prob_pos[torch.isnan(mean_log_prob_pos)] = 0.0
+        # print(mean_log_prob_pos)
+        # print(mask.sum(1))
+        # exit()
+        # loss
+        # contrast_loss = -(args.temperature / args.base_temperature) * mean_log_prob_pos
+        # contrast_loss = contrast_loss.view(anchor_count, batch_size).mean()
+        contrast_loss = -mean_log_prob_pos.mean()
+    elif sampling.lower() == 'single':
+        N = causal_rep.size(0)
+        pos_idx = torch.arange(N)
+        neg_idx = torch.randperm(N)
+        for i in range(N):
+            for j in range(N):
+                if labels[i] == labels[j]:
+                    pos_idx[i] = j
+                else:
+                    neg_idx[i] = j
+        contrast_loss = -torch.mean(
+            torch.bmm(causal_rep.unsqueeze(1), causal_rep[pos_idx].unsqueeze(1).transpose(1, 2)) -
+            torch.matmul(causal_rep.unsqueeze(1), causal_rep[neg_idx].unsqueeze(1).transpose(1, 2)))
+        raise Exception("Not implmented contrasting method")
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
     return contrast_loss
