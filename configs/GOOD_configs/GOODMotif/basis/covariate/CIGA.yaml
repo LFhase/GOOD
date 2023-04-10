@@ -4,7 +4,6 @@ model:
   model_name: CIGAGIN
 ood:
   ood_alg: CIGA
-<<<<<<< HEAD
   ood_param: 0.8
   extra_param:
     - 1
@@ -14,14 +13,3 @@ train:
   mile_stones:
     - 150
 log_file: default
-=======
-  ood_param: 0.3    # causal ratio
-  extra_param:
-    - 2    # alpha for contrastive loss
-train:
-  max_epoch: 200
-  lr: 1e-3
-  mile_stones: [150]
-
-
->>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
