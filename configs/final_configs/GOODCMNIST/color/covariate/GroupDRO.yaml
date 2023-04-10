@@ -7,6 +7,15 @@ ood:
   ood_param: 0.1
 train:
   max_epoch: 500
+<<<<<<< HEAD
   lr: 1e-3
   mile_stones: [300]
 
+=======
+  lr: 0.001
+  mile_stones:
+    - 300
+  weight_decay: 0.0
+log_file: lb_sweeping
+num_workers: 0
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c

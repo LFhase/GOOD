@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+=======
+"""
+Implementation of the CIGA algorithm from `"Learning Causally Invariant Representations for Out-of-Distribution Generalization on Graphs"
+<https://arxiv.org/abs/2202.05441>`_ paper
+
+Copied from https://github.com/LFhase/GOOD.
+"""
+
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 import copy
 import math
 from GOOD.networks.models.Pooling import GlobalAddPool
@@ -24,7 +34,13 @@ class CIGAGIN(GNNBasic):
     def __init__(self, config: Union[CommonArgs, Munch]):
         super(CIGAGIN, self).__init__(config)
         self.att_net = GAEAttNet(config.ood.ood_param, config)
+<<<<<<< HEAD
         
+=======
+        config_fe = copy.deepcopy(config)
+        config_fe.model.model_layer = config.model.model_layer - 2
+        self.feat_encoder = GINFeatExtractor(config_fe, without_embed=True)
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 
         self.num_tasks = config.dataset.num_classes
         self.causal_lin = torch.nn.Linear(config.model.dim_hidden, self.num_tasks)
@@ -33,6 +49,7 @@ class CIGAGIN(GNNBasic):
         self.contrast_rep = "feat"
         if type(config.ood.extra_param[-1]) == str:
             self.contrast_rep = config.ood.extra_param[-1]
+<<<<<<< HEAD
         print(self.contrast_rep)
         if self.contrast_rep == "raw":
             self.feat_encoder = self.att_net.gnn_node 
@@ -41,6 +58,8 @@ class CIGAGIN(GNNBasic):
             config_fe = copy.deepcopy(config)
             config_fe.model.model_layer = config.model.model_layer - 2
             self.feat_encoder = GINFeatExtractor(config_fe, without_embed=self.contrast_rep != "raw")
+=======
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 
     def forward(self, *args, **kwargs):
         r"""
@@ -62,6 +81,7 @@ class CIGAGIN(GNNBasic):
         (spu_x, spu_edge_index, spu_edge_attr, spu_edge_weight, spu_batch), \
         pred_edge_weight, node_h, orig_x = self.att_net(*args, **kwargs)
 
+<<<<<<< HEAD
         # --- Causal repr ---
         if self.contrast_rep == "raw":
             set_masks(pred_edge_weight, self)
@@ -79,11 +99,26 @@ class CIGAGIN(GNNBasic):
             )
 
 
+=======
+
+        if self.contrast_rep == "raw":
+            causal_x, _, __, ___ = relabel(orig_x, causal_edge_index, data.batch)
+            spu_x, _, __, ___ = relabel(orig_x, spu_edge_index, data.batch)
+
+        # --- Causal repr ---
+        set_masks(causal_edge_weight, self)
+        causal_rep = self.get_graph_rep(
+            data=Data(x=causal_x, edge_index=causal_edge_index,
+                      edge_attr=causal_edge_attr, batch=causal_batch),
+            batch_size=batch_size
+        )
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         causal_out = self.get_causal_pred(causal_rep)
         clear_masks(self)
 
         
         if self.training:
+<<<<<<< HEAD
             if self.contrast_rep == "raw":
                 causal_rep_out = causal_rep
                 # --- Conf repr ---
@@ -116,6 +151,28 @@ class CIGAGIN(GNNBasic):
                 # print(causal_h.size(),causal_rep_out.size())
                 # print("+++++++++++++++++++++++++++=")
             return causal_rep_out, causal_out, spu_out, pred_edge_weight
+=======
+            # --- Conf repr ---
+            set_masks(spu_edge_weight, self)
+            spu_rep = self.get_graph_rep(
+                data=Data(x=spu_x, edge_index=spu_edge_index,
+                          edge_attr=spu_edge_attr, batch=spu_batch),
+                batch_size=batch_size
+            )#.detach()
+            spu_out = self.get_spu_pred(spu_rep)
+            clear_masks(self)
+            # if self.contrast_rep == "feat":
+            #     causal_h, _, __, ___ = relabel(node_h, causal_edge_index, data.batch)
+            # if self.contrast_rep == "raw":
+            #     causal_x, _, __, ___ = relabel(orig_x, causal_edge_index, data.batch)
+            causal_rep_out = global_add_pool(causal_x, batch=causal_batch, size=batch_size)
+            # print(data)
+            # print(causal_x.size(),causal_edge_index.size(),causal_rep.size())
+            # print(spu_x.size(),spu_edge_index.size(),spu_rep.size())
+            # print(causal_h.size(),causal_rep_out.size())
+            # print("+++++++++++++++++++++++++++=")
+            return causal_rep_out, causal_out, spu_out
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         else:
 
             return causal_out
@@ -159,7 +216,11 @@ class CIGAvGIN(CIGAGIN):
         self.att_net = GAEAttNet(config.ood.ood_param, config, virtual_node=True)
         config_fe = copy.deepcopy(config)
         config_fe.model.model_layer = config.model.model_layer - 2
+<<<<<<< HEAD
         self.feat_encoder = vGINFeatExtractor(config_fe, without_embed=self.contrast_rep!="raw")
+=======
+        self.feat_encoder = vGINFeatExtractor(config_fe, without_embed=True)
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
     
 @register.model_register
 class CIGAvGINNB(CIGAGIN):
@@ -169,7 +230,11 @@ class CIGAvGINNB(CIGAGIN):
         self.att_net = GAEAttNet(config.ood.ood_param, config, virtual_node=True, no_bn=True)
         config_fe = copy.deepcopy(config)
         config_fe.model.model_layer = config.model.model_layer - 2
+<<<<<<< HEAD
         self.feat_encoder = vGINFeatExtractor(config_fe, without_embed=self.contrast_rep!="raw")
+=======
+        self.feat_encoder = vGINFeatExtractor(config_fe, without_embed=True)
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 
 
 class GAEAttNet(nn.Module):
@@ -177,6 +242,7 @@ class GAEAttNet(nn.Module):
     def __init__(self, causal_ratio, config, **kwargs):
         super(GAEAttNet, self).__init__()
         config_catt = copy.deepcopy(config)
+<<<<<<< HEAD
         
         self.contrast_rep = "feat"
         if type(config.ood.extra_param[-1]) == str:
@@ -186,6 +252,10 @@ class GAEAttNet(nn.Module):
             # config_catt.model.dropout_rate = 0
         # virtual node + small batch size can cause cuda mem access error
         # though it runs well on CPU
+=======
+        config_catt.model.model_layer = 2
+        config_catt.model.dropout_rate = 0
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         if kwargs.get('virtual_node'):
             self.gnn_node = vGINFeatExtractor(config_catt, without_readout=True, **kwargs)
         else:
@@ -202,6 +272,7 @@ class GAEAttNet(nn.Module):
         row, col = data.edge_index
         edge_rep = torch.cat([node_h[row], node_h[col]], dim=-1)
         edge_score = self.linear(edge_rep).view(-1)
+<<<<<<< HEAD
         if self.contrast_rep =="test": 
             print("Random edge attention...",end='')
             edge_score = torch.rand(edge_score.size()).to(edge_score.device)
@@ -211,14 +282,20 @@ class GAEAttNet(nn.Module):
             edge_score = torch.sigmoid(edge_score)
         elif self.contrast_rep =="tanh": 
             edge_score = torch.tanh(edge_score)
+=======
+
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         if data.edge_index.shape[1] != 0:
             (causal_edge_index, causal_edge_attr, causal_edge_weight), \
             (spu_edge_index, spu_edge_attr, spu_edge_weight) = split_graph(data, edge_score, self.ratio)
 
             causal_x, causal_edge_index, causal_batch, _ = relabel(node_h, causal_edge_index, data.batch)
             spu_x, spu_edge_index, spu_batch, _ = relabel(node_h, spu_edge_index, data.batch)
+<<<<<<< HEAD
             if self.contrast_rep =="feat": 
                 spu_edge_weight  *= -1
+=======
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
         else:
             causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch = \
                 node_h, data.edge_index, data.edge_attr, \
@@ -258,7 +335,11 @@ def split_graph(data, edge_score, ratio):
     new_spu_edge_index = data.edge_index[:, new_idx_drop]
 
     new_causal_edge_weight = edge_score[new_idx_reserve]
+<<<<<<< HEAD
     new_spu_edge_weight = edge_score[new_idx_drop]
+=======
+    new_spu_edge_weight = - edge_score[new_idx_drop]
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 
     if has_edge_attr:
         new_causal_edge_attr = data.edge_attr[new_idx_reserve]

@@ -4,6 +4,7 @@ model:
   model_name: GSATvGIN
 ood:
   ood_alg: GSAT
+<<<<<<< HEAD
   ood_param: 1.0    # info loss coefficient
   extra_param:
     - false    # learn_edge_att
@@ -14,3 +15,21 @@ train:
   lr: 1e-3
   mile_stones: [300]
 
+=======
+  ood_param: 1.0
+  extra_param:
+    - true
+    - 10
+    - 0.7
+train:
+  max_epoch: 200
+  train_bs: 64
+  val_bs: 128
+  test_bs: 128
+  lr: 0.001
+  mile_stones:
+    - 300
+  weight_decay: 0.0
+log_file: lb_sweeping
+num_workers: 0
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c

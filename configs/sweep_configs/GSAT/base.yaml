@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 exp_round:
   - 1
   - 5
@@ -11,6 +12,10 @@ ood_param:
   - 1
   - 2
   - 4
+=======
+includes:
+  - ../base.yaml
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c
 extra_param:
   -     # learn_edge_att
     - true

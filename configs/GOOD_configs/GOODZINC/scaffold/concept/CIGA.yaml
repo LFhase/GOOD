@@ -1,6 +1,7 @@
 includes:
   - base.yaml
 model:
+<<<<<<< HEAD
   model_name: CIGAGIN
 ood:
   ood_alg: CIGA
@@ -13,3 +14,17 @@ train:
   train_bs: 32
   lr: 0.001
 log_file: default
+=======
+  model_name: CIGAvGIN
+ood:
+  ood_alg: CIGA
+  ood_param: 0.8     # causal ratio
+  extra_param:
+    - 1    # additional loss control
+train:
+  max_epoch: 200
+  train_bs: 32
+  lr: 1e-3
+
+
+>>>>>>> 5c04bf7a724687acfda7ac6e1b54b80646b4605c

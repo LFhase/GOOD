@@ -48,8 +48,8 @@ class GroupDRO(BaseOODAlg):
         loss_list = []
         for i in range(config.dataset.num_envs):
             env_idx = data.env_id == i
-            if loss[env_idx].shape[0] > 0:
-                loss_list.append(loss[env_idx].sum() / mask.sum())
+            if loss[env_idx].shape[0] > 0 and mask[env_idx].sum() > 0:
+                loss_list.append(loss[env_idx].sum() / mask[env_idx].sum())
         losses = torch.stack(loss_list)
         group_weights = torch.ones(losses.shape[0], device=config.device)
         group_weights *= torch.exp(config.ood.ood_param * losses)
